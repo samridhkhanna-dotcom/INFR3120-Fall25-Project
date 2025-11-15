@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- basic page setup + character encoding -->
+    <meta charset="UTF-8">
+
+    <title>StudyNotes - Manage Your Study Materials</title>
+
+    <!-- linking stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- header section for website title + navigation bar -->
+    <header>
+        <div class="logo">
+            <h1>Study<span>Notes</span></h1> <!-- website title with colour highlight -->
+        </div>
+
+        <!-- navigation bar -->
+        <nav>
+            <ul>
+                <li><a href="index.html" class="active">Dashboard</a></li> <!-- current page -->
+                <li><a href="create.html">Create Note</a></li> <!-- go to create page -->
+            </ul>
+        </nav>
+    </header>
+
+    <!-- main content area -->
+    <main>
+
+        <!-- title section with heading + button + image -->
+        <section class="hero-section">
+
+            <!-- left side title + subtitle + button -->
+            <div class="about-text">
+                <h1>Organize Your Study Notes</h1> <!-- main hero heading -->
+                <h2>Create, manage, and access your study materials from anywhere</h2> <!-- sub heading -->
+
+                <!-- button to create a new note -->
+                <a href="create.html" class="hero-btn">Create New Note</a>
+            </div>
+
+            <!-- teams logo -->
+            <div class="about-image">
+                <img src="image.png"> <!-- teams logo -->
+            </div>
+
+        </section>
+
+        <!-- notes dashboard section -->
+        <section class="notes-dashboard">
+            <div class="experience-section">
+
+                <!-- section title -->
+                <h2>Your Study Notes</h2>
+
+                <!-- notes table wrapper -->
+                <div class="notes-table">
+
+                    <!-- table for saved notes -->
+                    <table id="notesTable">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Course</th>
+                                <th>Content Preview</th>
+                                <th>Date Created</th>
+                                <th>Actions</th> <!-- edit + delete -->
+                            </tr>
+                        </thead>
+
+                        <!-- notes in table body -->
+                        <tbody id="notesTableBody">
+                        </tbody>
+                    </table>
+
+                    <!-- message for when no notes exist -->
+                    <div id="emptyMessage" class="empty-message">
+                        <p>No notes yet. <a href="create.html">Create your first note!</a></p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- footer section -->
+    <footer>
+        <p> StudyNotes Team</p>
+    </footer>
+
+    <!-- javascript file  -->
+    <script src="script.js"></script>
+
+</body>
