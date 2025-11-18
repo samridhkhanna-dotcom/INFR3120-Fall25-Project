@@ -1,7 +1,7 @@
 class NotesManager {
     constructor() {
         // API base (same origin as server.js)
-        this.apiBase = "/notes";
+        this.apiBase = "/api/notes";
         this.init();
     }
 
