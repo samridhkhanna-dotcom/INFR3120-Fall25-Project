@@ -10,24 +10,26 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// --- API ROUTES MUST COME FIRST ---
+// API ROUTES
 const notesRouter = require("./routes/notes");
-app.use("/api/notes", notesRouter); 
-// API will now be at /api/notes (NOT /notes)
+app.use("/api/notes", notesRouter);
 
-// --- STATIC FILES ---
+// Static files (frontend)
 app.use(express.static(path.join(__dirname)));
 
-// --- FALLBACK ROUTE ---
-app.get("*", (req, res) => {
+// SAFE fallback for SPA routing (Express 5 compatible)
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// --- MongoDB CONNECT ---
+// MongoDB
 mongoose
-  .connect(process.env.MONGO_URI, { dbName: "studynotes" })
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("Connected to MongoDB Atlas"))
-  .catch(err => console.error("MongoDB error:", err));
+  .catch(err => console.error("MongoDB connection error:", err));
 
+// Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running on port", PORT));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
