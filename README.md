@@ -4,9 +4,13 @@ The app uses HTML, CSS, and JavaScript, along with localStorage, to store notes 
 This project demonstrates a full CRUD system:
 
 Create
+
 Read
+
 Update
+
 Delete
+
 Features
 
 Create new notes with a title, course, and content
