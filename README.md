@@ -1,5 +1,5 @@
 StudyNotes is a lightweight web application designed to help students easily create, edit, view, and manage their study notes.
-The app uses HTML, CSS, and JavaScript, along with localStorage, to store notes directly in the user’s browser so the data stays saved even after refreshing or closing the page.
+The app uses HTML, CSS, and JavaScript, along with Mongo DB, to store notes directly in the user’s browser so the data stays saved even after refreshing or closing the page.
 
 This project demonstrates a full CRUD system:
 
