@@ -37,20 +37,20 @@ mongoose.connect(DB.URI)
     .catch(err => console.log("MongoDB connection error:", err));
 
 // ----------
-// API Routes – MUST BE ABOVE STATIC ROUTES
+// API Routes
 // ----------
 app.use("/api/auth", authRouter);
 app.use("/api/notes", notesRouter);
 
 // ----------
-// Serve static frontend
+// Static frontend files
 // ----------
 app.use(express.static(path.join(__dirname, "../")));
 
 // ----------
-// EXPRESS 5 SAFE CATCH-ALL ROUTE
+// EXPRESS 5 SAFE CATCH-ALL ROUTE (RegExp)
 // ----------
-app.get("/*", (req, res) => {
+app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, "../index.html"));
 });
 
