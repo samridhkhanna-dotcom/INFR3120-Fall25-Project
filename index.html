@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>StudyNotes - Manage Your Study Materials</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <h1>Study<span>Notes</span></h1>
+        </div>
+
+        <nav>
+            <ul>
+                <li><a href="index.html" class="active">Dashboard</a></li>
+                <li><a href="create.html">Create Note</a></li>
+
+                <!-- Auth links -->
+                <li><a id="loginLink" href="login.html">Login</a></li>
+                <li><a id="registerLink" href="register.html">Register</a></li>
+                <li><a id="logoutLink" href="#" style="display:none;">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main -->
+    <main>
+
+        <section class="dashboard-section">
+            <div class="dashboard-text">
+                <h1>Organize Your Study Notes</h1>
+                <h2>Create, manage, and access your study materials from anywhere</h2>
+                <a href="create.html" class="dashboard-btn">Create New Note</a>
+            </div>
+
+            <div class="dashboard-image">
+                <img src="image.png">
+            </div>
+        </section>
+
+        <section class="notes-dashboard">
+            <div class="notes-section">
+                <h2>Your Study Notes</h2>
+
+                <div class="notes-table">
+                    <table id="notesTable">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Course</th>
+                                <th>Content Preview</th>
+                                <th>Date Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="notesTableBody"></tbody>
+                    </table>
+
+                    <div id="emptyMessage" class="empty-message">
+                        <p>No notes yet. <a href="create.html">Create your first note!</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>StudyNotes Team</p>
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
