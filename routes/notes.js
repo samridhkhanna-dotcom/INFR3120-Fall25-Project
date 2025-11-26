@@ -3,7 +3,7 @@ const router = express.Router();
 const Note = require("../models/Note");
 const requireAuth = require("../middleware/auth");
 
-// GET all notes (only user's notes)
+// GET all notes 
 router.get("/", requireAuth, async (req, res) => {
     try {
         const notes = await Note.find({ userId: req.session.user.id })
