@@ -1,57 +1,65 @@
 const express = require("express");
 const router = express.Router();
 const Note = require("../models/Note");
+const auth = require("../middleware/auth");
 
-// --- TEST ROUTE ---
-router.get("/test", (req, res) => {
-    res.json({ message: "router works" });
-});
-
-// --- GET ALL NOTES ---
-router.get("/", async (req, res) => {
+// GET all notes for logged in user
+router.get("/", auth, async (req, res) => {
     try {
-        const notes = await Note.find().sort({ createdAt: -1 });
+        const notes = await Note.find({ user: req.session.user.id }).sort({ createdAt: -1 });
         res.json(notes);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// --- GET ONE NOTE ---
-router.get("/:id", async (req, res) => {
+// GET single note
+router.get("/:id", auth, async (req, res) => {
     try {
-        const note = await Note.findById(req.params.id);
+        const note = await Note.findOne({ _id: req.params.id, user: req.session.user.id });
         res.json(note);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// --- CREATE NOTE ---
-router.post("/", async (req, res) => {
+// CREATE note
+router.post("/", auth, async (req, res) => {
     try {
-        const newNote = await Note.create(req.body);
+        const newNote = new Note({
+            title: req.body.title,
+            course: req.body.course,
+            content: req.body.content,
+            user: req.session.user.id
+        });
+
+        await newNote.save();
         res.json(newNote);
+
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// --- UPDATE NOTE ---
-router.put("/:id", async (req, res) => {
+// UPDATE note
+router.put("/:id", auth, async (req, res) => {
     try {
-        const updated = await Note.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const updated = await Note.findOneAndUpdate(
+            { _id: req.params.id, user: req.session.user.id },
+            req.body,
+            { new: true }
+        );
         res.json(updated);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// --- DELETE NOTE ---
-router.delete("/:id", async (req, res) => {
+// DELETE note
+router.delete("/:id", auth, async (req, res) => {
     try {
-        await Note.findByIdAndDelete(req.params.id);
-        res.json({ message: "Note deleted" });
+        await Note.findOneAndDelete({ _id: req.params.id, user: req.session.user.id });
+        res.json({ message: "Deleted" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
