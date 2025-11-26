@@ -8,21 +8,22 @@ router.post("/register", async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
-        const existingUser = await User.findOne({ username });
-        if (existingUser) {
-            return res.status(400).json({ message: "Username already exists" });
+        if (!username || !email || !password) {
+            return res.status(400).json({ message: "Missing fields" });
         }
 
-        const newUser = new User({
-            username,
-            email,
-            password
-        });
+        const existing = await User.findOne({ email });
+        if (existing) {
+            return res.status(400).json({ message: "Email already exists" });
+        }
 
+        const newUser = new User({ username, email, password });
         await newUser.save();
 
-        res.json({ message: "User registered successfully" });
+        res.json({ message: "Registered successfully" });
+
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -30,9 +31,9 @@ router.post("/register", async (req, res) => {
 // LOGIN
 router.post("/login", async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { email, password } = req.body;
 
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ message: "User not found" });
         }
@@ -42,14 +43,16 @@ router.post("/login", async (req, res) => {
             return res.status(400).json({ message: "Incorrect password" });
         }
 
-        // Save user into session
         req.session.user = {
             id: user._id,
-            username: user.username
+            username: user.username,
+            email: user.email
         };
 
         res.json({ message: "Login successful", user: req.session.user });
+
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -63,11 +66,10 @@ router.get("/logout", (req, res) => {
 
 // CHECK LOGIN STATUS
 router.get("/status", (req, res) => {
-    if (req.session && req.session.user) {
-        res.json({ loggedIn: true, user: req.session.user });
-    } else {
-        res.json({ loggedIn: false });
+    if (req.session.user) {
+        return res.json({ loggedIn: true, user: req.session.user });
     }
+    res.json({ loggedIn: false });
 });
 
 module.exports = router;
