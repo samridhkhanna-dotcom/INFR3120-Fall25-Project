@@ -1,68 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - StudyNotes</title>
-    <link rel="stylesheet" href="style.css">
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<header>
-    <h1>StudyNotes</h1>
-    <nav>
-        <a href="index.html">Dashboard</a>
-        <a href="create.html">Create Note</a>
-        <a id="loginLink" href="login.html">Login</a>
-        <a id="registerLink" href="register.html">Register</a>
-        <a id="logoutLink" style="display:none; cursor:pointer;">Logout</a>
-    </nav>
-</header>
+  <!-- NAVBAR -->
+  <header>
+    <div class="logo"><h1>Study<span>Notes</span></h1></div>
+  </header>
 
-<div class="form-container">
+  <div class="form-container">
     <h2>Login</h2>
 
-    <form id="loginForm">
+    <label>Username</label>
+    <input type="text" id="loginUsername" placeholder="Enter username">
 
-        <label>Username</label>
-        <input type="text" id="loginUsername" required>
+    <label>Password</label>
+    <input type="password" id="loginPassword" placeholder="Enter password">
 
-        <label>Password</label>
-        <input type="password" id="loginPassword" required>
+    <button id="loginBtn">Login</button>
 
-        <button type="submit">Login</button>
+    <p>Don’t have an account? <a href="register.html">Register</a></p>
+  </div>
 
-    </form>
-
-    <p>Don't have an account? <a href="register.html">Register</a></p>
-</div>
-
-<script>
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const username = loginUsername.value;
-        const password = loginPassword.value;
-
-        const res = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ username, password })
-        });
-
-        const data = await res.json();
-
-        alert(data.message);
-
-        if (data.message === "Login successful") {
-            window.location.href = "index.html";
-        }
-    });
-</script>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 
 </body>
 </html>
