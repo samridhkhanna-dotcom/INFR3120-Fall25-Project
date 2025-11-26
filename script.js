@@ -281,3 +281,73 @@ class NotesManager {
 
 // Global instance used by HTML onclick
 const notesManager = new NotesManager();
+// -----------------------------
+// REGISTER USER
+// -----------------------------
+const registerBtn = document.getElementById("registerBtn");
+if (registerBtn) {
+    registerBtn.addEventListener("click", async () => {
+        const username = document.getElementById("regUsername").value.trim();
+        const email = document.getElementById("regEmail").value.trim();
+        const password = document.getElementById("regPassword").value.trim();
+
+        if (!username || !email || !password) {
+            alert("Please fill all fields");
+            return;
+        }
+
+        try {
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email, password }),
+                credentials: "include"
+            });
+
+            const data = await res.json();
+            alert(data.message);
+
+            if (res.ok) {
+                window.location.href = "login.html";
+            }
+        } catch (err) {
+            console.error("Register error:", err);
+        }
+    });
+}
+
+
+// -----------------------------
+// LOGIN USER
+// -----------------------------
+const loginBtn = document.getElementById("loginBtn");
+if (loginBtn) {
+    loginBtn.addEventListener("click", async () => {
+        const username = document.getElementById("loginUsername").value.trim();
+        const password = document.getElementById("loginPassword").value.trim();
+
+        if (!username || !password) {
+            alert("Please fill all fields");
+            return;
+        }
+
+        try {
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password }),
+                credentials: "include"
+            });
+
+            const data = await res.json();
+            alert(data.message);
+
+            if (res.ok) {
+                window.location.href = "index.html";
+            }
+        } catch (err) {
+            console.error("Login error:", err);
+        }
+    });
+}
+
