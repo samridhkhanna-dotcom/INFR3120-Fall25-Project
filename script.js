@@ -13,6 +13,14 @@ async function checkLoginStatus() {
         const registerLink = document.getElementById("registerLink");
         const logoutLink = document.getElementById("logoutLink");
 
+        // Nav links for Dashboard / Create
+        const dashboardNav = document.querySelector('nav a[href="index.html"]');
+        const createNav = document.querySelector('nav a[href="create.html"]');
+        const heroCreateBtn = document.querySelector(".dashboard-btn");
+
+        const page = window.location.pathname.split("/").pop();
+        const protectedPages = ["", "index.html", "create.html", "edit.html"];
+
         if (data.loggedIn) {
             // Hide login/register
             if (loginLink) loginLink.style.display = "none";
@@ -21,18 +29,37 @@ async function checkLoginStatus() {
             // Show logout
             if (logoutLink) logoutLink.style.display = "inline-block";
 
-            logoutLink.onclick = async () => {
-                await fetch("/api/auth/logout", {
-                    credentials: "include"
-                });
-                window.location.reload();
-            };
+            // Show dashboard/create links + hero button
+            if (dashboardNav) dashboardNav.style.display = "inline-block";
+            if (createNav) createNav.style.display = "inline-block";
+            if (heroCreateBtn) heroCreateBtn.style.display = "inline-block";
+
+            // Logout click handler
+            if (logoutLink) {
+                logoutLink.onclick = async (e) => {
+                    e.preventDefault();
+                    await fetch("/api/auth/logout", {
+                        credentials: "include"
+                    });
+                    window.location.href = "login.html";
+                };
+            }
 
         } else {
-            // User is not logged in
+            // Not logged in: show login/register
             if (loginLink) loginLink.style.display = "inline-block";
             if (registerLink) registerLink.style.display = "inline-block";
             if (logoutLink) logoutLink.style.display = "none";
+
+            // Hide dashboard/create + hero button
+            if (dashboardNav) dashboardNav.style.display = "none";
+            if (createNav) createNav.style.display = "none";
+            if (heroCreateBtn) heroCreateBtn.style.display = "none";
+
+            // If they are on a protected page, send to login
+            if (protectedPages.includes(page)) {
+                window.location.href = "login.html";
+            }
         }
 
     } catch (err) {
@@ -42,6 +69,9 @@ async function checkLoginStatus() {
 
 checkLoginStatus();
 
+// -----------------------------
+// NOTES MANAGER (USES SESSION)
+// -----------------------------
 class NotesManager {
     constructor() {
         // API base (same origin as server.js)
@@ -69,6 +99,22 @@ class NotesManager {
         return div.innerHTML;
     }
 
+    // Helper: if unauthorized, go to login
+    async handleAuthFetch(url, options = {}) {
+        const res = await fetch(url, {
+            credentials: "include",
+            ...options
+        });
+
+        if (res.status === 401) {
+            // session expired / not logged in
+            window.location.href = "login.html";
+            return null;
+        }
+
+        return res;
+    }
+
     // -------------------------
     // LOAD NOTES (GET /notes)
     // -------------------------
@@ -79,7 +125,9 @@ class NotesManager {
         if (!body || !empty) return;
 
         try {
-            const res = await fetch(this.apiBase);
+            const res = await this.handleAuthFetch(this.apiBase);
+            if (!res) return; // redirected
+
             const notes = await res.json();
 
             if (!notes || notes.length === 0) {
@@ -125,11 +173,20 @@ class NotesManager {
             if (!title || !course || !content) return;
 
             try {
-                await fetch(this.apiBase, {
+                const res = await this.handleAuthFetch(this.apiBase, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ title, course, content })
                 });
+
+                if (!res) return; // maybe redirected
+
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    console.error("Error creating note:", data);
+                    alert("Could not create note.");
+                    return;
+                }
 
                 // Go back to dashboard
                 window.location.href = "index.html";
@@ -153,7 +210,9 @@ class NotesManager {
 
         try {
             // Load existing note
-            const res = await fetch(`${this.apiBase}/${id}`);
+            const res = await this.handleAuthFetch(`${this.apiBase}/${id}`);
+            if (!res) return; // redirected
+
             const note = await res.json();
 
             // Fill form
@@ -171,11 +230,20 @@ class NotesManager {
 
                 if (!title || !course || !content) return;
 
-                await fetch(`${this.apiBase}/${id}`, {
+                const updateRes = await this.handleAuthFetch(`${this.apiBase}/${id}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ title, course, content })
                 });
+
+                if (!updateRes) return;
+
+                if (!updateRes.ok) {
+                    const data = await updateRes.json().catch(() => ({}));
+                    console.error("Error updating note:", data);
+                    alert("Could not update note.");
+                    return;
+                }
 
                 window.location.href = "index.html";
             });
@@ -191,7 +259,19 @@ class NotesManager {
     // -------------------------
     async deleteNote(id) {
         try {
-            await fetch(`${this.apiBase}/${id}`, { method: "DELETE" });
+            const res = await this.handleAuthFetch(`${this.apiBase}/${id}`, {
+                method: "DELETE"
+            });
+
+            if (!res) return;
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                console.error("Error deleting note:", data);
+                alert("Could not delete note.");
+                return;
+            }
+
             this.loadNotes();
         } catch (err) {
             console.error("Error deleting note:", err);
