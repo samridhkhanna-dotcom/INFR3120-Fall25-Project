@@ -1,64 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Login - StudyNotes</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <header>
-        <div class="logo"><h1>Study<span>Notes</span></h1></div>
-    </header>
+<div class="form-container">
+    <h2>Login</h2>
 
-    <main>
-        <div class="note-form" style="max-width:400px;margin:auto;margin-top:40px;">
-            <h2>Login</h2>
+    <form id="loginForm">
+        <label>Username</label>
+        <input type="text" id="username" required>
 
-            <form id="loginForm">
-                <div class="form-group">
-                    <label>Username</label>
-                    <input type="text" id="username" required>
-                </div>
+        <label>Password</label>
+        <input type="password" id="password" required>
 
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="password" required>
-                </div>
+        <button type="submit">Login</button>
+    </form>
 
-                <button class="btn-primary" type="submit">Login</button>
-            </form>
+    <p>Don't have an account? <a href="register.html">Register</a></p>
 
-            <p style="margin-top:15px;text-align:center;">
-                Don’t have an account? <a href="register.html">Register</a>
-            </p>
-        </div>
-    </main>
+    <p id="message"></p>
+</div>
 
-    <script>
-        document.getElementById("loginForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
+<script>
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-            const username = document.getElementById("username").value.trim();
-            const password = document.getElementById("password").value.trim();
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
 
-            const res = await fetch("/api/auth/login", {
-                method: "POST",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password })
-            });
+    const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+    });
 
-            const data = await res.json();
+    const data = await res.json();
+    document.getElementById("message").textContent = data.message;
 
-            if (res.ok) {
-                window.location.href = "index.html";
-            } else {
-                alert(data.message);
-            }
-        });
-    </script>
+    if (res.ok) {
+        setTimeout(() => {
+            window.location.href = "index.html";
+        }, 800);
+    }
+});
+</script>
 
 </body>
 </html>
