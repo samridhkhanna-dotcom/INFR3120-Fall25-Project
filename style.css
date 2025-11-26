@@ -373,3 +373,79 @@ footer {
   border-top: 1px solid rgba(255,255,255,0.05);
   margin-top: 40px;
 }
+
+/* ----------------------------- */
+/* AUTH FORMS (LOGIN & REGISTER) */
+/* ----------------------------- */
+
+.form-container {
+    max-width: 420px;
+    margin: 70px auto;
+    padding: 30px;
+    background: rgba(38,38,42,0.96);
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+    text-align: left;
+}
+
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #3bb89e;
+}
+
+.form-container label {
+    display: block;
+    margin: 10px 0 5px;
+    color: #b5b5b8;
+    font-size: 0.9rem;
+}
+
+.form-container input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #121214;
+    color: #eee;
+    margin-bottom: 18px;
+}
+
+.form-container input:focus {
+    outline: none;
+    border-color: #3bb89e;
+    box-shadow: 0 0 0 2px rgba(59, 184, 158, 0.25);
+}
+
+.form-container button {
+    width: 100%;
+    padding: 12px;
+    background: #3bb89e;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    margin-top: 5px;
+    transition: 0.3s ease;
+}
+
+.form-container button:hover {
+    background: #34a58a;
+}
+
+.form-container p {
+    text-align: center;
+    margin-top: 15px;
+    color: #9a9a9c;
+}
+
+.form-container a {
+    color: #3bb89e;
+    text-decoration: none;
+}
+
+.form-container a:hover {
+    text-decoration: underline;
+}
+
