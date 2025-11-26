@@ -1,31 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - StudyNotes</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <header>
-    <div class="logo"><h1>Study<span>Notes</span></h1></div>
-  </header>
+<header>
+    <div class="logo">
+        <h1>Study<span>Notes</span></h1>
+    </div>
+    <nav>
+        <ul>
+            <li><a href="login.html" class="active">Login</a></li>
+            <li><a href="register.html" id="registerLink">Register</a></li>
+        </ul>
+    </nav>
+</header>
 
-  <div class="form-container">
+<!-- ============================= -->
+<!--  HERO SECTION (Added Here)    -->
+<!-- ============================= -->
+<section class="dashboard-section">
+    <div class="dashboard-text" style="width: 100%; text-align: center;">
+        <h1>Organize Your Study Notes</h1>
+        <h2>Create, manage, and access your study materials from anywhere</h2>
+    </div>
+
+    <div style="display:flex; justify-content:center; margin-top:20px;">
+        <img src="image.png" alt="Team Logo" style="width:180px; border-radius:12px;">
+    </div>
+</section>
+
+<!-- ============================= -->
+<!--        LOGIN FORM             -->
+<!-- ============================= -->
+<div class="form-container">
     <h2>Login</h2>
 
     <label>Username</label>
-    <input type="text" id="loginUsername" placeholder="Enter username">
+    <input type="text" id="username" placeholder="Enter username">
 
     <label>Password</label>
-    <input type="password" id="loginPassword" placeholder="Enter password">
+    <input type="password" id="password" placeholder="Enter password">
 
-    <button id="loginBtn">Login</button>
+    <button onclick="loginUser()">Login</button>
 
     <p>Don’t have an account? <a href="register.html">Register</a></p>
-  </div>
+</div>
 
-  <script src="script.js"></script>
+<script>
+async function loginUser() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!username || !password) {
+        alert("Please fill out all fields.");
+        return;
+    }
+
+    const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username, password }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+        window.location.href = "index.html";
+    } else {
+        alert(data.message || "Login failed.");
+    }
+}
+</script>
 
 </body>
 </html>
