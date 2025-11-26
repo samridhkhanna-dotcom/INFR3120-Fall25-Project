@@ -2,52 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - StudyNotes</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+
+<header>
+    <h1>StudyNotes</h1>
+    <nav>
+        <a href="index.html">Dashboard</a>
+        <a href="create.html">Create Note</a>
+        <a id="loginLink" href="login.html">Login</a>
+        <a id="registerLink" href="register.html">Register</a>
+        <a id="logoutLink" style="display:none; cursor:pointer;">Logout</a>
+    </nav>
+</header>
 
 <div class="form-container">
     <h2>Login</h2>
 
     <form id="loginForm">
+
         <label>Username</label>
-        <input type="text" id="username" required>
+        <input type="text" id="loginUsername" required>
 
         <label>Password</label>
-        <input type="password" id="password" required>
+        <input type="password" id="loginPassword" required>
 
         <button type="submit">Login</button>
+
     </form>
 
     <p>Don't have an account? <a href="register.html">Register</a></p>
-
-    <p id="message"></p>
 </div>
 
 <script>
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value;
+        const username = loginUsername.value;
+        const password = loginPassword.value;
 
-    const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
-    });
+        const res = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ username, password })
+        });
 
-    const data = await res.json();
-    document.getElementById("message").textContent = data.message;
+        const data = await res.json();
 
-    if (res.ok) {
-        setTimeout(() => {
+        alert(data.message);
+
+        if (data.message === "Login successful") {
             window.location.href = "index.html";
-        }, 800);
-    }
-});
+        }
+    });
 </script>
+
+<script src="script.js"></script>
 
 </body>
 </html>
