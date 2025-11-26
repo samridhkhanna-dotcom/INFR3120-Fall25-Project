@@ -3,7 +3,7 @@ const router = express.Router();
 const Note = require("../models/Note");
 const requireAuth = require("../middleware/auth");
 
-// --- GET ALL NOTES (must be logged in) ---
+// --- GET ALL NOTES (LOGIN REQUIRED) ---
 router.get("/", requireAuth, async (req, res) => {
     try {
         const notes = await Note.find().sort({ createdAt: -1 });
@@ -48,4 +48,13 @@ router.put("/:id", requireAuth, async (req, res) => {
 });
 
 // --- DELETE NOTE ---
-router.delete("/:id", requireAuth, async (req,
+router.delete("/:id", requireAuth, async (req, res) => {
+    try {
+        await Note.findByIdAndDelete(req.params.id);
+        res.json({ message: "Note deleted" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+module.exports = router;
