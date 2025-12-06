@@ -19,7 +19,7 @@
                 <li><a href="index.html">Dashboard</a></li>
                 <li><a href="create.html" class="active">Create Note</a></li>
 
-                <!-- Auth links -->
+                <!-- Auth links (handled by script.js) -->
                 <li><a id="loginLink" href="login.html">Login</a></li>
                 <li><a id="registerLink" href="register.html">Register</a></li>
                 <li><a id="logoutLink" href="#" style="display:none;">Logout</a></li>
@@ -33,7 +33,6 @@
             <h2>Create New Study Note</h2>
 
             <form id="noteForm" class="note-form">
-
                 <div class="form-group">
                     <label for="noteTitle">Note Title:</label>
                     <input type="text" id="noteTitle" name="noteTitle" required placeholder="Enter note title">
@@ -60,7 +59,6 @@
                     <button type="submit" class="btn-primary">Save Note</button>
                     <a href="index.html" class="btn-secondary">Cancel</a>
                 </div>
-
             </form>
         </section>
     </main>
