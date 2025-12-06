@@ -13,22 +13,35 @@ async function checkLoginStatus() {
         const registerLink = document.getElementById("registerLink");
         const logoutLink = document.getElementById("logoutLink");
 
+        // Nav links for Dashboard / Create
         const dashboardNav = document.querySelector('nav a[href="index.html"]');
         const createNav = document.querySelector('nav a[href="create.html"]');
         const heroCreateBtn = document.querySelector(".dashboard-btn");
+
+        // Account panel elements
+        const avatar = document.getElementById("accountAvatar");
+        const nameEl = document.getElementById("accountUsername");
+        const emailEl = document.getElementById("accountEmail");
+        const changePasswordForm = document.getElementById("changePasswordForm");
+        const setPasswordForm = document.getElementById("setPasswordForm");
 
         const page = window.location.pathname.split("/").pop();
         const protectedPages = ["", "index.html", "create.html", "edit.html"];
 
         if (data.loggedIn) {
+            // Hide login/register
             if (loginLink) loginLink.style.display = "none";
             if (registerLink) registerLink.style.display = "none";
+
+            // Show logout
             if (logoutLink) logoutLink.style.display = "inline-block";
 
+            // Show dashboard/create links + hero button
             if (dashboardNav) dashboardNav.style.display = "inline-block";
             if (createNav) createNav.style.display = "inline-block";
             if (heroCreateBtn) heroCreateBtn.style.display = "inline-block";
 
+            // Logout click handler
             if (logoutLink) {
                 logoutLink.onclick = async (e) => {
                     e.preventDefault();
@@ -39,29 +52,44 @@ async function checkLoginStatus() {
                 };
             }
 
-            // Fill account widgets
-            if (page === "" || page === "index.html") {
-                const avatar = document.getElementById("accountAvatar");
-                const nameEl = document.getElementById("accountUsername");
-                const emailEl = document.getElementById("accountEmail");
+            // ----- Fill account info on dashboard -----
+            if ((page === "" || page === "index.html") && data.user) {
+                if (nameEl) nameEl.textContent = data.user.username || "";
+                if (emailEl) emailEl.textContent = data.user.email || "";
+                if (avatar) {
+                    if (data.user.profilePic) {
+                        avatar.src = data.user.profilePic;
+                    } else {
+                        avatar.src = "image.png"; // default logo as avatar
+                    }
+                }
 
-                if (data.user) {
-                    if (nameEl) nameEl.textContent = data.user.username;
-                    if (emailEl) emailEl.textContent = data.user.email;
-                    if (avatar) {
-                        avatar.src = data.user.profilePic || "image.png";
+                // Toggle which password form to show
+                if (changePasswordForm && setPasswordForm) {
+                    if (data.user.hasPassword) {
+                        // Local account: can change password
+                        changePasswordForm.style.display = "block";
+                        setPasswordForm.style.display = "none";
+                    } else {
+                        // Google-only: can only set first password
+                        setPasswordForm.style.display = "block";
+                        changePasswordForm.style.display = "none";
                     }
                 }
             }
+
         } else {
+            // Not logged in: show login/register
             if (loginLink) loginLink.style.display = "inline-block";
             if (registerLink) registerLink.style.display = "inline-block";
             if (logoutLink) logoutLink.style.display = "none";
 
+            // Hide dashboard/create + hero button
             if (dashboardNav) dashboardNav.style.display = "none";
             if (createNav) createNav.style.display = "none";
             if (heroCreateBtn) heroCreateBtn.style.display = "none";
 
+            // If they are on a protected page, send to login
             if (protectedPages.includes(page)) {
                 window.location.href = "login.html";
             }
@@ -74,16 +102,17 @@ async function checkLoginStatus() {
 
 checkLoginStatus();
 
-
-// =====================================================
-// NOTES MANAGER — uses session authentication
-// =====================================================
+// -----------------------------
+// NOTES MANAGER (USES SESSION)
+// -----------------------------
 class NotesManager {
     constructor() {
+        // API base (same origin as server.js)
         this.apiBase = "/api/notes";
         this.init();
     }
 
+    // Decide which page we are on
     init() {
         const page = window.location.pathname.split("/").pop();
 
@@ -96,12 +125,14 @@ class NotesManager {
         }
     }
 
+    // Clean text for HTML
     clean(text) {
         const div = document.createElement("div");
-        div.textContent = text || "";
+        div.textContent = text ?? "";
         return div.innerHTML;
     }
 
+    // Helper: if unauthorized, go to login
     async handleAuthFetch(url, options = {}) {
         const res = await fetch(url, {
             credentials: "include",
@@ -109,14 +140,16 @@ class NotesManager {
         });
 
         if (res.status === 401) {
+            // session expired / not logged in
             window.location.href = "login.html";
             return null;
         }
+
         return res;
     }
 
     // -------------------------
-    // LOAD NOTES
+    // LOAD NOTES (GET /notes)
     // -------------------------
     async loadNotes() {
         const body = document.getElementById("notesTableBody");
@@ -126,11 +159,11 @@ class NotesManager {
 
         try {
             const res = await this.handleAuthFetch(this.apiBase);
-            if (!res) return;
+            if (!res) return; // redirected
 
             const notes = await res.json();
 
-            if (!notes.length) {
+            if (!notes || notes.length === 0) {
                 empty.style.display = "block";
                 body.innerHTML = "";
                 return;
@@ -142,8 +175,8 @@ class NotesManager {
                 <tr>
                     <td>${this.clean(n.title)}</td>
                     <td>${this.clean(n.course)}</td>
-                    <td>${this.clean(n.content.substring(0, 50))}${n.content.length > 50 ? "..." : ""}</td>
-                    <td>${new Date(n.createdAt).toLocaleDateString()}</td>
+                    <td>${this.clean((n.content || "").substring(0, 50))}${(n.content || "").length > 50 ? "..." : ""}</td>
+                    <td>${n.createdAt ? new Date(n.createdAt).toLocaleDateString() : ""}</td>
                     <td>
                         <a href="edit.html?id=${n._id}" class="btn-edit">Edit</a>
                         <button class="btn-delete" onclick="notesManager.deleteNote('${n._id}')">Delete</button>
@@ -157,7 +190,7 @@ class NotesManager {
     }
 
     // -------------------------
-    // CREATE NOTE
+    // CREATE NOTE (POST /notes)
     // -------------------------
     handleCreateForm() {
         const form = document.getElementById("noteForm");
@@ -172,78 +205,122 @@ class NotesManager {
 
             if (!title || !course || !content) return;
 
-            const res = await this.handleAuthFetch(this.apiBase, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ title, course, content })
-            });
+            try {
+                const res = await this.handleAuthFetch(this.apiBase, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, course, content })
+                });
 
-            if (res?.ok) window.location.href = "index.html";
-            else alert("Could not create note.");
+                if (!res) return; // maybe redirected
+
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    console.error("Error creating note:", data);
+                    alert("Could not create note.");
+                    return;
+                }
+
+                // Go back to dashboard
+                window.location.href = "index.html";
+            } catch (err) {
+                console.error("Error creating note:", err);
+            }
         });
     }
 
     // -------------------------
-    // EDIT NOTE
+    // EDIT NOTE (GET + PUT /notes/:id)
     // -------------------------
     async handleEditForm() {
         const params = new URLSearchParams(window.location.search);
         const id = params.get("id");
-        if (!id) return (window.location.href = "index.html");
 
-        const res = await this.handleAuthFetch(`${this.apiBase}/${id}`);
-        if (!res) return;
+        if (!id) {
+            window.location.href = "index.html";
+            return;
+        }
 
-        const note = await res.json();
+        try {
+            // Load existing note
+            const res = await this.handleAuthFetch(`${this.apiBase}/${id}`);
+            if (!res) return; // redirected
 
-        document.getElementById("editNoteTitle").value = note.title;
-        document.getElementById("editNoteCourse").value = note.course;
-        document.getElementById("editNoteContent").value = note.content;
+            const note = await res.json();
 
-        const form = document.getElementById("editNoteForm");
+            // Fill form
+            document.getElementById("editNoteTitle").value = note.title || "";
+            document.getElementById("editNoteCourse").value = note.course || "";
+            document.getElementById("editNoteContent").value = note.content || "";
 
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
+            const form = document.getElementById("editNoteForm");
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
 
-            const title = document.getElementById("editNoteTitle").value.trim();
-            const course = document.getElementById("editNoteCourse").value.trim();
-            const content = document.getElementById("editNoteContent").value.trim();
+                const title = document.getElementById("editNoteTitle").value.trim();
+                const course = document.getElementById("editNoteCourse").value.trim();
+                const content = document.getElementById("editNoteContent").value.trim();
 
-            const update = await this.handleAuthFetch(`${this.apiBase}/${id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ title, course, content })
+                if (!title || !course || !content) return;
+
+                const updateRes = await this.handleAuthFetch(`${this.apiBase}/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, course, content })
+                });
+
+                if (!updateRes) return;
+
+                if (!updateRes.ok) {
+                    const data = await updateRes.json().catch(() => ({}));
+                    console.error("Error updating note:", data);
+                    alert("Could not update note.");
+                    return;
+                }
+
+                window.location.href = "index.html";
             });
 
-            if (update?.ok) window.location.href = "index.html";
-            else alert("Could not update note.");
-        });
+        } catch (err) {
+            console.error("Error loading note for edit:", err);
+            window.location.href = "index.html";
+        }
     }
 
     // -------------------------
-    // DELETE NOTE
+    // DELETE NOTE (DELETE /notes/:id)
     // -------------------------
     async deleteNote(id) {
-        const res = await this.handleAuthFetch(`${this.apiBase}/${id}`, {
-            method: "DELETE"
-        });
+        try {
+            const res = await this.handleAuthFetch(`${this.apiBase}/${id}`, {
+                method: "DELETE"
+            });
 
-        if (res?.ok) this.loadNotes();
-        else alert("Could not delete note.");
+            if (!res) return;
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                console.error("Error deleting note:", data);
+                alert("Could not delete note.");
+                return;
+            }
+
+            this.loadNotes();
+        } catch (err) {
+            console.error("Error deleting note:", err);
+        }
     }
 }
 
+// Global instance used by HTML onclick
 const notesManager = new NotesManager();
 
-
-// ========================================
-// REGISTER
-// ========================================
+// -----------------------------
+// REGISTER USER
+// -----------------------------
 const registerBtn = document.getElementById("registerBtn");
 if (registerBtn) {
-    registerBtn.onclick = async () => {
+    registerBtn.addEventListener("click", async () => {
         const username = document.getElementById("regUsername").value.trim();
         const email = document.getElementById("regEmail").value.trim();
         const password = document.getElementById("regPassword").value.trim();
@@ -253,27 +330,32 @@ if (registerBtn) {
             return;
         }
 
-        const res = await fetch("/api/auth/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ username, email, password })
-        });
+        try {
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email, password }),
+                credentials: "include"
+            });
 
-        const data = await res.json();
-        alert(data.message);
+            const data = await res.json();
+            alert(data.message);
 
-        if (res.ok) window.location.href = "login.html";
-    };
+            if (res.ok) {
+                window.location.href = "login.html";
+            }
+        } catch (err) {
+            console.error("Register error:", err);
+        }
+    });
 }
 
-
-// ========================================
-// LOGIN (LOCAL)
-// ========================================
+// -----------------------------
+// LOGIN USER
+// -----------------------------
 const loginBtn = document.getElementById("loginBtn");
 if (loginBtn) {
-    loginBtn.onclick = async () => {
+    loginBtn.addEventListener("click", async () => {
         const username = document.getElementById("loginUsername").value.trim();
         const password = document.getElementById("loginPassword").value.trim();
 
@@ -282,81 +364,138 @@ if (loginBtn) {
             return;
         }
 
-        const res = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ username, password })
-        });
+        try {
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password }),
+                credentials: "include"
+            });
 
-        const data = await res.json();
-        alert(data.message);
+            const data = await res.json();
+            alert(data.message);
 
-        if (res.ok) window.location.href = "index.html";
-    };
+            if (res.ok) {
+                window.location.href = "index.html";
+            }
+        } catch (err) {
+            console.error("Login error:", err);
+        }
+    });
 }
 
-
-// ========================================
-// PROFILE PICTURE UPLOAD
-// ========================================
+// -----------------------------
+// PROFILE PICTURE UPLOAD (ACCOUNT SECTION)
+// -----------------------------
 const profilePicForm = document.getElementById("profilePicForm");
 if (profilePicForm) {
-    profilePicForm.onsubmit = async (e) => {
+    profilePicForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const fileInput = document.getElementById("profilePicInput");
-        if (!fileInput.files.length) {
-            alert("Choose an image first.");
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            alert("Please choose an image file first.");
             return;
         }
 
         const formData = new FormData();
         formData.append("profilePic", fileInput.files[0]);
 
-        const res = await fetch("/api/auth/profile-picture", {
-            method: "POST",
-            credentials: "include",
-            body: formData
-        });
+        try {
+            const res = await fetch("/api/auth/profile-picture", {
+                method: "POST",
+                credentials: "include",
+                body: formData
+            });
 
-        const data = await res.json();
-        alert(data.message);
+            const data = await res.json();
 
-        if (res.ok) {
+            if (!res.ok) {
+                alert(data.message || "Could not update profile picture.");
+                return;
+            }
+
+            alert(data.message || "Profile picture updated.");
+
             const avatar = document.getElementById("accountAvatar");
-            if (avatar) avatar.src = data.profilePicUrl;
+            if (avatar && data.profilePicUrl) {
+                avatar.src = data.profilePicUrl;
+            }
+        } catch (err) {
+            console.error("Profile picture upload error:", err);
         }
-    };
+    });
 }
 
-
-// ========================================
-// CHANGE PASSWORD
-// ========================================
+// -----------------------------
+// CHANGE PASSWORD (ACCOUNT SECTION)
+// -----------------------------
 const changePasswordForm = document.getElementById("changePasswordForm");
 if (changePasswordForm) {
-    changePasswordForm.onsubmit = async (e) => {
+    changePasswordForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const oldPassword = document.getElementById("oldPassword").value.trim();
         const newPassword = document.getElementById("newPassword").value.trim();
 
         if (!oldPassword || !newPassword) {
-            alert("Fill both fields.");
+            alert("Please fill in both password fields.");
             return;
         }
 
-        const res = await fetch("/api/auth/change-password", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ oldPassword, newPassword })
-        });
+        try {
+            const res = await fetch("/api/auth/change-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ oldPassword, newPassword })
+            });
 
-        const data = await res.json();
-        alert(data.message);
+            const data = await res.json();
+            alert(data.message || "Password change request finished.");
 
-        if (res.ok) changePasswordForm.reset();
-    };
+            if (res.ok) {
+                changePasswordForm.reset();
+            }
+        } catch (err) {
+            console.error("Change password error:", err);
+        }
+    });
+}
+
+// -----------------------------
+// SET PASSWORD (GOOGLE USERS)
+// -----------------------------
+const setPasswordForm = document.getElementById("setPasswordForm");
+if (setPasswordForm) {
+    setPasswordForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const newPassword = document.getElementById("setPassword").value.trim();
+
+        if (!newPassword) {
+            alert("Enter a password.");
+            return;
+        }
+
+        try {
+            const res = await fetch("/api/auth/set-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ newPassword })
+            });
+
+            const data = await res.json();
+            alert(data.message || "Password set request finished.");
+
+            if (res.ok) {
+                setPasswordForm.reset();
+                // after setting a password, on next refresh they’ll see the Change Password form
+                checkLoginStatus();
+            }
+        } catch (err) {
+            console.error("Set password error:", err);
+        }
+    });
 }
