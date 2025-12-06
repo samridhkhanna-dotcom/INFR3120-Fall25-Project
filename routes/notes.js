@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Note = require("../models/Note");
-const requireAuth = require("../middleware/auth");
+const { requireAuth } = require("../middleware/auth");
 
 // GET all notes 
 router.get("/", requireAuth, async (req, res) => {
