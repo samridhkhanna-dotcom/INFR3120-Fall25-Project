@@ -21,9 +21,7 @@ const UserSchema = new mongoose.Schema(
   }
 );
 
-// ------------------------------
 // HASH PASSWORD IF CHANGED
-// ------------------------------
 UserSchema.pre("save", async function (next) {
   try {
     if (!this.isModified("password") || !this.password) return next();
@@ -37,9 +35,8 @@ UserSchema.pre("save", async function (next) {
   }
 });
 
-// ------------------------------
+
 // COMPARE PASSWORD
-// ------------------------------
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   if (!this.password) return false; // OAuth-only account
   return bcrypt.compare(candidatePassword, this.password);
